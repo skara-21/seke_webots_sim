@@ -1,4 +1,4 @@
 type: demo
-publish: false
+publish: true
 dockerCompose:
   theia: webots-project/controllers/
