@@ -1,0 +1,427 @@
+#VRML_SIM R2025a utf8
+# RoverBot — Seke Autonomous Delivery Robot
+# Alcobendas / SSR · Universidad Europea de Madrid
+#
+# Appearance:  red box body · black top cap · 6 chunky wheels · round eye sensors
+# Orientation: robot FORWARD = -Z  (Webots standard)
+# Drive:       2 driven wheels (middle L/R) + 4 passive corner wheels
+# Sensors:     GPS, Compass, Camera (right eye, looks -Z = forward)
+# Controller:  rover_controller
+
+PROTO RoverBot [
+  field SFVec3f    translation      0 1.5 0
+  field SFRotation rotation         0 1 0 0
+  field SFString   name             "rover"
+  field SFString   controller       "rover_controller"
+  field MFString   controllerArgs   []
+  field SFColor    bodyColor        0.88 0.10 0.08    # Seke red
+  field SFColor    trimColor        0.07 0.07 0.08    # near-black trim
+  field SFInt32    cameraWidth      640
+  field SFInt32    cameraHeight     480
+]
+{
+  Robot {
+    translation IS translation
+    rotation    IS rotation
+    name        IS name
+    controller  IS controller
+    controllerArgs IS controllerArgs
+
+    children [
+
+      # ══════════════════════════════════════════════════════════════
+      # BODY  (forward = -Z)
+      # ══════════════════════════════════════════════════════════════
+
+      # Main red body block
+      DEF BODY Transform {
+        translation 0 0.46 0
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS bodyColor
+              roughness 0.45
+              metalness 0.15
+            }
+            geometry Box { size 0.46 0.50 0.54 }
+          }
+        ]
+      }
+
+      # Top cap (black — "DELIVERY" panel in image)
+      DEF TOP_CAP Transform {
+        translation 0 0.75 0
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS trimColor
+              roughness 0.50
+              metalness 0.20
+            }
+            geometry Box { size 0.48 0.10 0.56 }
+          }
+        ]
+      }
+
+      # Bottom skirt (black)
+      DEF BOTTOM_SKIRT Transform {
+        translation 0 0.215 0
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS trimColor
+              roughness 0.60
+              metalness 0.10
+            }
+            geometry Box { size 0.48 0.07 0.56 }
+          }
+        ]
+      }
+
+      # ── Front face details  (front = -Z) ──────────────────────────
+
+      # Front black bezel panel (frames the eyes)
+      DEF FRONT_BEZEL Transform {
+        translation 0 0.50 -0.272
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor IS trimColor
+              roughness 0.40
+              metalness 0.25
+            }
+            geometry Box { size 0.38 0.26 0.005 }
+          }
+        ]
+      }
+
+      # Left eye housing
+      DEF EYE_HOUSING_L Transform {
+        translation -0.10 0.52 -0.277
+        rotation 1 0 0 1.5708
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.05 0.05 0.05
+              roughness 0.35
+              metalness 0.55
+            }
+            geometry Cylinder { radius 0.055  height 0.010 }
+          }
+          # Dark lens
+          Transform {
+            translation 0 -0.006 0
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.12 0.14 0.18
+                  roughness 0.05
+                  metalness 0.10
+                  transparency 0.30
+                }
+                geometry Cylinder { radius 0.042  height 0.003 }
+              }
+            ]
+          }
+          # Lens glint
+          Transform {
+            translation 0.016 -0.010 0.016
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.95 0.95 1.00
+                  roughness 0.02
+                  transparency 0.10
+                }
+                geometry Cylinder { radius 0.008  height 0.001 }
+              }
+            ]
+          }
+        ]
+      }
+
+      # Right eye housing  (camera lives here)
+      DEF EYE_HOUSING_R Transform {
+        translation 0.10 0.52 -0.277
+        rotation 1 0 0 1.5708
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.05 0.05 0.05
+              roughness 0.35
+              metalness 0.55
+            }
+            geometry Cylinder { radius 0.055  height 0.010 }
+          }
+          Transform {
+            translation 0 -0.006 0
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.12 0.14 0.18
+                  roughness 0.05
+                  metalness 0.10
+                  transparency 0.30
+                }
+                geometry Cylinder { radius 0.042  height 0.003 }
+              }
+            ]
+          }
+          Transform {
+            translation 0.016 -0.010 0.016
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  baseColor 0.95 0.95 1.00
+                  roughness 0.02
+                  transparency 0.10
+                }
+                geometry Cylinder { radius 0.008  height 0.001 }
+              }
+            ]
+          }
+        ]
+      }
+
+      # Headlights (white strips below eyes)
+      DEF HEADLIGHT_L Transform {
+        translation -0.10 0.405 -0.274
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.95 0.95 0.88
+              roughness 0.10
+              metalness 0.05
+              emissiveColor 0.60 0.60 0.50
+            }
+            geometry Box { size 0.07 0.025 0.006 }
+          }
+        ]
+      }
+
+      DEF HEADLIGHT_R Transform {
+        translation 0.10 0.405 -0.274
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.95 0.95 0.88
+              roughness 0.10
+              metalness 0.05
+              emissiveColor 0.60 0.60 0.50
+            }
+            geometry Box { size 0.07 0.025 0.006 }
+          }
+        ]
+      }
+
+      # ── Side branding panels ───────────────────────────────────────
+      # (Slightly lighter red to suggest the "Seke" logo area)
+
+      DEF BRAND_L Transform {
+        translation -0.233 0.50 -0.04
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.92 0.15 0.12
+              roughness 0.40
+              metalness 0.10
+            }
+            geometry Box { size 0.004 0.30 0.36 }
+          }
+        ]
+      }
+
+      DEF BRAND_R Transform {
+        translation 0.233 0.50 -0.04
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.92 0.15 0.12
+              roughness 0.40
+              metalness 0.10
+            }
+            geometry Box { size 0.004 0.30 0.36 }
+          }
+        ]
+      }
+
+      # Sensor pod on top cap (camera cluster visible in image)
+      DEF SENSOR_POD Transform {
+        translation 0 0.805 -0.08
+        children [
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.10 0.10 0.10
+              roughness 0.50
+              metalness 0.30
+            }
+            geometry Box { size 0.12 0.04 0.08 }
+          }
+        ]
+      }
+
+      # ══════════════════════════════════════════════════════════════
+      # CAMERA  — right eye, no rotation needed (Camera default = -Z = forward)
+      # ══════════════════════════════════════════════════════════════
+
+      DEF CAM_MOUNT Transform {
+        translation 0.10 0.52 -0.280
+        children [
+          Camera {
+            name "front_camera"
+            fieldOfView 1.05
+            width  IS cameraWidth
+            height IS cameraHeight
+            near 0.05
+            far  200
+          }
+        ]
+      }
+
+      # ══════════════════════════════════════════════════════════════
+      # GPS + COMPASS  (on sensor pod)
+      # ══════════════════════════════════════════════════════════════
+
+      GPS     { translation 0 0.85 -0.08  name "gps"     accuracy 0.5 }
+      Compass { translation 0 0.85 -0.08  name "compass" }
+
+      # ══════════════════════════════════════════════════════════════
+      # DRIVEN WHEELS  — middle left / right  (AXLE_LENGTH = 0.61 → ±0.305)
+      # ══════════════════════════════════════════════════════════════
+
+      DEF LEFT_WHEEL HingeJoint {
+        jointParameters HingeJointParameters {
+          axis   1 0 0
+          anchor -0.305 0.10 0
+        }
+        device [
+          RotationalMotor { name "left_motor"   maxVelocity 20.0  maxTorque 10.0 }
+          PositionSensor  { name "left_encoder" }
+        ]
+        endPoint Solid {
+          translation -0.305 0.10 0
+          rotation 0 0 1 1.5708
+          children [
+            DEF WHEEL_SHAPE Shape {
+              appearance PBRAppearance {
+                baseColor 0.06 0.06 0.06
+                roughness 0.95
+              }
+              geometry Cylinder { radius 0.10  height 0.085 }
+            }
+          ]
+          name "left_wheel"
+          boundingObject Cylinder { radius 0.10  height 0.085 }
+          physics Physics { density -1  mass 1.2 }
+        }
+      }
+
+      DEF RIGHT_WHEEL HingeJoint {
+        jointParameters HingeJointParameters {
+          axis   1 0 0
+          anchor 0.305 0.10 0
+        }
+        device [
+          RotationalMotor { name "right_motor"   maxVelocity 20.0  maxTorque 10.0 }
+          PositionSensor  { name "right_encoder" }
+        ]
+        endPoint Solid {
+          translation 0.305 0.10 0
+          rotation 0 0 1 1.5708
+          children [ USE WHEEL_SHAPE ]
+          name "right_wheel"
+          boundingObject Cylinder { radius 0.10  height 0.085 }
+          physics Physics { density -1  mass 1.2 }
+        }
+      }
+
+      # ══════════════════════════════════════════════════════════════
+      # PASSIVE CORNER CONTACTS  (BallJoints — no constraint issues)
+      # Sphere physics, cylinder visuals to match the wheel look
+      # ══════════════════════════════════════════════════════════════
+
+      DEF CASTER_FL BallJoint {
+        jointParameters BallJointParameters { anchor -0.305 0.10 -0.22 }
+        endPoint Solid {
+          translation -0.305 0.10 -0.22
+          children [
+            Transform {
+              rotation 0 0 1 1.5708
+              children [ USE WHEEL_SHAPE ]
+            }
+          ]
+          name "caster_fl"
+          boundingObject Sphere { radius 0.10 }
+          physics Physics { density -1  mass 1.2 }
+        }
+      }
+
+      DEF CASTER_FR BallJoint {
+        jointParameters BallJointParameters { anchor 0.305 0.10 -0.22 }
+        endPoint Solid {
+          translation 0.305 0.10 -0.22
+          children [
+            Transform {
+              rotation 0 0 1 1.5708
+              children [ USE WHEEL_SHAPE ]
+            }
+          ]
+          name "caster_fr"
+          boundingObject Sphere { radius 0.10 }
+          physics Physics { density -1  mass 1.2 }
+        }
+      }
+
+      DEF CASTER_RL BallJoint {
+        jointParameters BallJointParameters { anchor -0.305 0.10 0.22 }
+        endPoint Solid {
+          translation -0.305 0.10 0.22
+          children [
+            Transform {
+              rotation 0 0 1 1.5708
+              children [ USE WHEEL_SHAPE ]
+            }
+          ]
+          name "caster_rl"
+          boundingObject Sphere { radius 0.10 }
+          physics Physics { density -1  mass 1.2 }
+        }
+      }
+
+      DEF CASTER_RR BallJoint {
+        jointParameters BallJointParameters { anchor 0.305 0.10 0.22 }
+        endPoint Solid {
+          translation 0.305 0.10 0.22
+          children [
+            Transform {
+              rotation 0 0 1 1.5708
+              children [ USE WHEEL_SHAPE ]
+            }
+          ]
+          name "caster_rr"
+          boundingObject Sphere { radius 0.10 }
+          physics Physics { density -1  mass 1.2 }
+        }
+      }
+
+    ]  # end children
+
+    # ── Collision envelope ─────────────────────────────────────────────────
+    boundingObject Group {
+      children [
+        # Body + cap + skirt
+        Transform {
+          translation 0 0.48 0
+          children [ Box { size 0.50 0.62 0.58 } ]
+        }
+      ]
+    }
+
+    physics Physics {
+      density -1
+      mass 15.0
+      centerOfMass [ 0 0.18 0 ]   # low CoM for stability
+    }
+
+  }  # end Robot
+}
